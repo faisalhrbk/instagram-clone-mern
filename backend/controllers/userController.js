@@ -30,6 +30,11 @@ export const register = async (req, res) => {
 		});
 	} catch (err) {
 		console.log(err);
+
+		res.status(500).json({
+			message: "internal server error",
+			success: false,
+		});
 	}
 };
 
@@ -85,6 +90,11 @@ export const login = async (req, res) => {
 			});
 	} catch (err) {
 		console.log(err);
+
+		res.status(500).json({
+			message: "internal server error",
+			success: false,
+		});
 	}
 };
 
@@ -96,5 +106,41 @@ export const logout = async (_, res) => {
 		});
 	} catch (err) {
 		console.log(err);
+
+		res.status(500).json({
+			message: "internal server error",
+			success: false,
+		});
+	}
+};
+
+export const getProfile = async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const user = await User.findById(userId);
+		res.status(200).json({
+			user,
+			success: true,
+		});
+	} catch (err) {
+		console.log(err);
+
+		res.status(500).json({
+			message: "internal server error",
+			success: false,
+		});
+	}
+};
+
+export const editProfile = async (req, res) => {
+	try {
+		const userId = req.id;
+        
+	} catch (err) {
+		console.log(err);
+		res.status(500).json({
+			message: "internal server error",
+			success: false,
+		});
 	}
 };
