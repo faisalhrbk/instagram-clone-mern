@@ -19,11 +19,11 @@ export const register = async (req, res) => {
 				success: false,
 			});
 		}
-		const hashedPassword = await bcrypt(password, 10);
+		const hashedPassword = await bcrypt.hash(password, 10);
 		User.create({
 			username,
 			email,
-			hashedPassword,
+			password: hashedPassword,
 		});
 		return res.status(201).json({
 			message: "User Register Successfully",
@@ -49,7 +49,7 @@ export const login = async (req, res) => {
 				success: false,
 			});
 		}
-		let user = await findOne({ email });
+		let user = await User.findOne({ email });
 		if (!email) {
 			return res.status(401).json({
 				message: "Email doesnt exist in database",
@@ -217,11 +217,11 @@ export const followOrUnfollow = async (req, res) => {
 		if (isFollowing) {
 			//unfollow logic
 			await Promise.all([
-				user.updateOne(
+				User.updateOne(
 					{ _id: followKrneWala },
 					{ $pull: { following: jiskoFollowKarunga } }
 				),
-				user.updateOne(
+				User.updateOne(
 					{ _id: jiskoFollowKarunga },
 					{ $pull: { followers: followKrneWala } }
 				),

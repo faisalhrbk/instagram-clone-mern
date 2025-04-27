@@ -1,12 +1,27 @@
-import express from 'express'
-import { register, login, logout, getProfile } from '../controllers/userController.js';
-import  {isAuthenticated}  from '../middlewares/isAuth.js';
+import express from "express";
+import {
+	register,
+	login,
+	logout,
+	getProfile,
+	editProfile,
+	getSuggestedUsers,
+	followOrUnfollow,
+} from "../controllers/userController.js";
+import { isAuthenticated } from "../middlewares/isAuth.js";
+import upload from "../middlewares/multer.js";
 
-const router = express.Router();
+const userRouter = express.Router();
 
- router.route('/register').post(register)
-  router.route("/login").post(login);
-   router.route("/logout").get(logout);
-    router.route("/:id/profile").get(isAuthenticated, getProfile);
-     router.route("/profile/edit").post(register);
-      router.route("/register").post(register);
+userRouter.route("/register").post(register);
+userRouter.route("/login").post(login);
+userRouter.route("/logout").get(logout);
+userRouter.route("/:id/profile").get(isAuthenticated, getProfile);
+userRouter
+	.route("/profile/edit")
+	.post(isAuthenticated, upload.single("profilePicture"), editProfile);
+userRouter.route("/suggested-user").get(isAuthenticated, getSuggestedUsers);
+userRouter
+	.route("/follow-or-unfollow/:id")
+	.post(isAuthenticated, followOrUnfollow);
+export default userRouter;

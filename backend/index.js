@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 
 //Local Modules
 import connectDB from "./utils/mongoDb.js";
+import userRouter from "./routes/userRouter.js";
 
 // Packages Config and variables
 const app = express();
@@ -28,6 +29,7 @@ app.use(cors(corsOptions));
 app.get("/", (req, res, next) => {
 	res.send("hello world");
 });
+app.use('/api/v1/user' , userRouter)
 
 //Start Server
 app.listen(PORT, () => {
