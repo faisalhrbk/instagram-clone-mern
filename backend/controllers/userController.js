@@ -142,8 +142,24 @@ export const editProfile = async (req, res) => {
 
 		if (profilePicture) {
 			const fileUri = getDataUri(profilePicture);
-			
+			cloudResponse = await cloudinary.uploader.upload(fileUri);
 		}
+		const user = await UserByID(userId);
+		if (!user) {
+			return res.status(404).json({
+				message: "user not found",
+				success: false,
+				user
+			});
+		}
+		if (bio) user.bio = bio;
+		if (gender) user.gender = gender;
+		if (profilePicture) user.profilePicture = cloudResponse.secure_url;
+		await user.save();
+		return res.status(200).json({
+			message: "profile updated successfully",
+			success: success,
+		});
 	} catch (err) {
 		console.log(err);
 		res.status(500).json({

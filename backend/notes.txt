@@ -2,3 +2,7 @@ so here ill list the thing i have done in the backend side
 
 1, installed packages
 > npm i express mongoose nodemon jsonwebtoken bcryptjs cookie-parser cors
+
+
+
+27/april25 user ka photo save krna bht overwhelming process hai
