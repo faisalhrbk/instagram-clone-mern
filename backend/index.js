@@ -3,10 +3,16 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import dotenv from 'dotenv';
 //Local Modules
 
-//middlewares
+// Packages Config and variables
 const app = express();
+dotenv.config({});
+const PORT = process.env.PORT || 3000;
+
+
+//middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -20,7 +26,7 @@ app.use(cors(corsOptions));
 app.get("/", (req, res, next) => {
 	res.send("hello world");
 });
-const PORT = 3000;
+
 app.listen(PORT, () => {
 	console.log(`Server is running on port http://localhost:${PORT}`);
 });
