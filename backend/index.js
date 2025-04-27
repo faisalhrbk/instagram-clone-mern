@@ -1,18 +1,20 @@
 //Core Modules
+
 // External Modules
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
+
 //Local Modules
+import connectDB from "./utils/mongoDb.js";
 
 // Packages Config and variables
 const app = express();
 dotenv.config({});
 const PORT = process.env.PORT || 3000;
 
-
-//middlewares
+//Middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -22,11 +24,13 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-//routes go here
+//Routes
 app.get("/", (req, res, next) => {
 	res.send("hello world");
 });
 
+//Start Server
 app.listen(PORT, () => {
+	connectDB();
 	console.log(`Server is running on port http://localhost:${PORT}`);
 });
