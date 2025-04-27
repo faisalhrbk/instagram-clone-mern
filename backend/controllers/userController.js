@@ -192,3 +192,66 @@ export const getSuggestedUsers = async (req, res) => {
 		});
 	}
 };
+
+export const followOrUnfollow = async (req, res) => {
+	try {
+		const followKrneWala = req.id;
+		const jiskoFollowKarunga = req.params.id;
+		if (followKrneWala === jiskoFollowKarunga) {
+			return res.status(400).json({
+				message: "you cant follow/unfollow yourself",
+				success: false,
+			});
+		}
+		const user = await User.findById(followKrneWala);
+		const targetUser = await User.findById(jiskoFollowKarunga);
+
+		if (!user || !targetUser) {
+			return res.status(400).json({
+				message: "user not Found",
+				success: false,
+			});
+		}
+		// now to check karunga follow krna hai ya unfollow;
+		const isFollowing = user.following.includes(jiskoFollowKarunga);
+		if (isFollowing) {
+			//unfollow logic
+			await Promise.all([
+				user.updateOne(
+					{ _id: followKrneWala },
+					{ $pull: { following: jiskoFollowKarunga } }
+				),
+				user.updateOne(
+					{ _id: jiskoFollowKarunga },
+					{ $pull: { followers: followKrneWala } }
+				),
+			]);
+			return res.status(200).json({
+				message: "unfollow Successfully",
+				success: true,
+			});
+		} else {
+			//follow logic
+			await Promise.all([
+				user.updateOne(
+					{ _id: followKrneWala },
+					{ $push: { following: jiskoFollowKarunga } }
+				),
+				user.updateOne(
+					{ _id: jiskoFollowKarunga },
+					{ $push: { followers: followKrneWala } }
+				),
+			]);
+			return res.status(200).json({
+				message: "follow Successfully",
+				success: true,
+			});
+		}
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({
+			message: "internal server error",
+			success: false,
+		});
+	}
+};
