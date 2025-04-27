@@ -29,10 +29,11 @@ app.use(cors(corsOptions));
 app.get("/", (req, res, next) => {
 	res.send("hello world");
 });
-app.use('/api/v1/user' , userRouter)
+
+app.use("/api/v1/user", userRouter);
 
 //Start Server
-app.listen(PORT, () => {
-	connectDB();
+app.listen(PORT, async () => {
+	await connectDB();
 	console.log(`Server is running on port http://localhost:${PORT}`);
 });

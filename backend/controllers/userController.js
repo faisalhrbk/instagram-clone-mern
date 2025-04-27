@@ -2,13 +2,14 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/dataUri.js";
+import cloudinary from "../utils/cloudinary.js";
 
 export const register = async (req, res) => {
 	try {
 		const { username, email, password } = req.body;
 		if (!username || !email || !password) {
 			return res.status(401).json({
-				message: "Something is missing please Check",
+				message: "Something is missing please Check email | password | username",
 				success: false,
 			});
 		}
@@ -158,7 +159,7 @@ export const editProfile = async (req, res) => {
 		await user.save();
 		return res.status(200).json({
 			message: "profile updated successfully",
-			success: success,
+			success: true,
 		});
 	} catch (err) {
 		console.log(err);
@@ -233,11 +234,11 @@ export const followOrUnfollow = async (req, res) => {
 		} else {
 			//follow logic
 			await Promise.all([
-				user.updateOne(
+				User.updateOne(
 					{ _id: followKrneWala },
 					{ $push: { following: jiskoFollowKarunga } }
 				),
-				user.updateOne(
+				User.updateOne(
 					{ _id: jiskoFollowKarunga },
 					{ $push: { followers: followKrneWala } }
 				),

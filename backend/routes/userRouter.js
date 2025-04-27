@@ -13,6 +13,11 @@ import upload from "../middlewares/multer.js";
 
 const userRouter = express.Router();
 
+// Add request logging middleware
+userRouter.use((req, res, next) => {
+	console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+	next();
+});
 userRouter.route("/register").post(register);
 userRouter.route("/login").post(login);
 userRouter.route("/logout").get(logout);
