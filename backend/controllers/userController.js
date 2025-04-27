@@ -144,12 +144,12 @@ export const editProfile = async (req, res) => {
 			const fileUri = getDataUri(profilePicture);
 			cloudResponse = await cloudinary.uploader.upload(fileUri);
 		}
-		const user = await UserByID(userId);
+		const user = await User.findById(userId);
 		if (!user) {
 			return res.status(404).json({
 				message: "user not found",
 				success: false,
-				user
+				user,
 			});
 		}
 		if (bio) user.bio = bio;
@@ -163,6 +163,30 @@ export const editProfile = async (req, res) => {
 	} catch (err) {
 		console.log(err);
 		res.status(500).json({
+			message: "internal server error",
+			success: false,
+		});
+	}
+};
+
+export const getSuggestedUsers = async (req, res) => {
+	try {
+		const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select(
+			"-password"
+		);
+		if (!suggestedUsers) {
+			res.status(400).json({
+				message: "currently dont have any suggested users",
+			});
+		}
+		return res.status(200).json({
+			message: " here are your suggested users",
+			success: false,
+			users: suggestedUsers,
+		});
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({
 			message: "internal server error",
 			success: false,
 		});
