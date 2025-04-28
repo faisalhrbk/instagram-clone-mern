@@ -101,3 +101,29 @@ export const getUserPosts = async (req, res) => {
 		});
 	}
 };
+export const likePost = async (req, res) => {
+	try {
+		const likeKrneWalaUserKiId = req.id;
+		const postId = req.params.id;
+		const post = await Post.findById(postId);
+		if (!post) {
+			return res
+				.status(404)
+				.json({ message: "post not found", success: false });
+		}
+		//like logic started;
+		await post.updateOne({ $addToSet: { likes: likeKrneWalaUserKiId } });
+		await post.save();
+
+		//implementing socket io for real time notification
+		return res.status(200).json({
+			message: "post Liked",
+			success: true,
+		});
+	} catch (err) {
+		return res.status(500).json({
+			message: " Internal Server Error!",
+			success: false,
+		});
+	}
+};
