@@ -1,8 +1,6 @@
 import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
 
-import { Conversation, Message, User } from "../models";
-
 export const sendMessage = async (req, res) => {
 	try {
 		const senderId = req.id;
@@ -15,7 +13,7 @@ export const sendMessage = async (req, res) => {
 				.status(400)
 				.json({ message: "Message cannot be empty", success: false });
 		}
-		if (!receiverId.match(/^[0-9a-fA-F]{24}$/)) {
+		if (!receiverId) {
 			return res
 				.status(400)
 				.json({ message: "Invalid receiver ID", success: false });
@@ -72,15 +70,13 @@ export const sendMessage = async (req, res) => {
 	}
 };
 
-import { Conversation, Message } from "../models";
-
 export const getMessage = async (req, res) => {
 	try {
 		const senderId = req.id;
 		const receiverId = req.params.id;
 
 		// Validate receiverId
-		if (!receiverId.match(/^[0-9a-fA-F]{24}$/)) {
+		if (!receiverId) {
 			return res
 				.status(400)
 				.json({ message: "Invalid receiver ID", success: false });
