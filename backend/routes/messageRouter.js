@@ -1,5 +1,5 @@
 import express from "express";
-import isAuthenticated from "../middlewares/isAuth.js";
+import { isAuthenticated } from "../middlewares/isAuth.js";
 
 import { getMessage, sendMessage } from "../controllers/messageController.js";
 const messageRouter = express.Router();
