@@ -2,6 +2,8 @@ import sharp from "sharp";
 import cloudinary from "../utils/cloudinary.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import Comment from "../models/Comment.js";
+
 export const addNewPost = async (req, res) => {
 	try {
 		const { caption } = req.body;
@@ -43,12 +45,14 @@ export const addNewPost = async (req, res) => {
 			post,
 		});
 	} catch (err) {
+		//    console.log(err);
 		return res.status(500).json({
 			message: "Internal Server Error",
 			success: false,
 		});
 	}
 };
+
 export const getAllPost = async (req, res) => {
 	try {
 		const posts = await Post.find()
@@ -66,12 +70,14 @@ export const getAllPost = async (req, res) => {
 			success: true,
 		});
 	} catch (err) {
+		//    console.log(err);
 		return res.status(500).json({
 			message: " Internal Server Error!",
 			success: false,
 		});
 	}
 };
+
 export const getUserPosts = async (req, res) => {
 	try {
 		const authorId = req.id;
@@ -79,14 +85,14 @@ export const getUserPosts = async (req, res) => {
 			.sort({ createdAt: -1 })
 			.populate({
 				path: "author",
-				select: "username, profilePicture",
+				select: "username profilePicture",
 			})
 			.populate({
 				path: "comments",
 				sort: { createdAt: -1 },
 				populate: {
 					path: "author",
-					select: "username,profilePicture",
+					select: "username profilePicture",
 				},
 			});
 		return res.status(200).json({
@@ -95,12 +101,14 @@ export const getUserPosts = async (req, res) => {
 			success: true,
 		});
 	} catch (err) {
+		//    console.log(err);
 		return res.status(500).json({
 			message: " Internal Server Error!",
 			success: false,
 		});
 	}
 };
+
 export const likePost = async (req, res) => {
 	try {
 		const likeKrneWalaUserKiId = req.id;
@@ -121,13 +129,13 @@ export const likePost = async (req, res) => {
 			success: true,
 		});
 	} catch (err) {
+		//    console.log(err);
 		return res.status(500).json({
 			message: " Internal Server Error!",
 			success: false,
 		});
 	}
 };
-
 
 export const disLikePost = async (req, res) => {
 	try {
@@ -149,6 +157,48 @@ export const disLikePost = async (req, res) => {
 			success: true,
 		});
 	} catch (err) {
+		// console.log(err);
+
+		return res.status(500).json({
+			message: " Internal Server Error!",
+			success: false,
+		});
+	}
+};
+
+export const addComment = async (req, res) => {
+	try {
+		const commentKrneWalaKiId = req.id;
+		const postId = req.params.id;
+		const post = await Post.findById(postId);
+		const { text } = req.body;
+		if (!text) {
+			return res.status(400).json({
+				message: "comment is empty",
+				success: false,
+			});
+		}
+		if (!post) {
+			return res.status(401).json({
+				message: "post not found",
+				success: false,
+			});
+		}
+
+		const comment = Comment.create({
+			text,
+			author: commentKrneWalaKiId,
+			post: postId,
+		}).populate({ path: "author", select: "username profilePicture" });
+		post.comments.push(comment._id);
+
+		await post.save();
+		return res.status(201).json({
+			message: "comment added",
+			success: true,
+		});
+	} catch (err) {
+		// console.log(err);
 		return res.status(500).json({
 			message: " Internal Server Error!",
 			success: false,
