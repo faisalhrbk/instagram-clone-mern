@@ -247,31 +247,80 @@ export const getCommentsOfPost = async (req, res) => {
 	}
 };
 
+// export const deletePost = async (req, res) => {
+// 	try {
+// 		const { id: authorId } = req;
+// 		const { id: postId } = req.params;
+
+// 		if (!postId)
+// 			return res
+// 				.status(404)
+// 				.json({ message: "send a valid post Id", success: false });
+
+// 		const post = await Post.findById(postId);
+// 		if (!post || post.author.toString() !== authorId)
+// 			return res.status(403).json({ message: "Unauthorized", success: false });
+
+// 		await Post.findByIdAndDelete(postId);
+// 		await User.findByIdAndUpdate(authorId, { $pull: { posts: postId } });
+
+// 		return res
+// 			.status(200)
+// 			.json({ message: "Post deleted successfully", success: true });
+// 	} catch (err) {
+// 		console.error(err);
+// 		return res
+// 			.status(500)
+// 			.json({ message: "Internal server error", success: false });
+// 	}
+// };
+
+
 export const deletePost = async (req, res) => {
 	try {
 		const { id: authorId } = req;
 		const { id: postId } = req.params;
 
-		if (!postId)
+		// Validate postId
+		if (!postId.match(/^[0-9a-fA-F]{24}$/)) {
+			return res
+				.status(400)
+				.json({ message: "Invalid post ID", success: false });
+		}
+
+		// Check post and authorization
+		const post = await Post.findById(postId);
+		if (!post) {
 			return res
 				.status(404)
-				.json({ message: "send a valid post Id", success: false });
-
-		const post = await Post.findById(postId);
-		if (!post || post.author.toString() !== authorId)
+				.json({ message: "Post not found", success: false });
+		}
+		if (post.author.toString() !== authorId) {
 			return res.status(403).json({ message: "Unauthorized", success: false });
+		}
 
-		await Post.findByIdAndDelete(postId);
-		await User.findByIdAndUpdate(authorId, { $pull: { posts: postId } });
+		// Delete Cloudinary image
+		if (post.imageUrl) {
+			const publicId = post.imageUrl.split("/").pop().split(".")[0];
+			await cloudinary.uploader.destroy(`instagram_posts/${publicId}`);
+		}
 
-		return res
-			.status(200)
-			.json({ message: "Post deleted successfully", success: true });
+		// Delete post, comments, and update user atomically
+		await Promise.all([
+			Post.findByIdAndDelete(postId),
+			Comment.deleteMany({ post: postId }),
+			User.findByIdAndUpdate(authorId, { $pull: { posts: postId } }),
+		]);
+
+		return res.status(200).json({
+			message: "Post deleted successfully",
+			success: true,
+		});
 	} catch (err) {
-		console.error(err);
-		return res
-			.status(500)
-			.json({ message: "Internal server error", success: false });
+		console.error("Error deleting post:", err);
+		return res.status(500).json({
+			message: "Internal server error",
+			success: false,
+		});
 	}
 };
-
