@@ -31,7 +31,7 @@ export const register = async (req, res) => {
 			success: true,
 		});
 	} catch (err) {
-		console.log(err);
+		// console.log(err);
 
 		res.status(500).json({
 			message: "internal server error",
@@ -91,7 +91,7 @@ export const login = async (req, res) => {
 				user,
 			});
 	} catch (err) {
-		console.log(err);
+		// console.log(err);
 
 		res.status(500).json({
 			message: "internal server error",
@@ -107,7 +107,7 @@ export const logout = async (_, res) => {
 			success: true,
 		});
 	} catch (err) {
-		console.log(err);
+		// console.log(err);
 
 		res.status(500).json({
 			message: "internal server error",
@@ -119,13 +119,13 @@ export const logout = async (_, res) => {
 export const getProfile = async (req, res) => {
 	try {
 		const userId = req.params.id;
-		const user = await User.findById(userId);
+		const user = await User.findById(userId).select('-password');
 		res.status(200).json({
 			user,
 			success: true,
 		});
 	} catch (err) {
-		console.log(err);
+		// console.log(err);
 
 		res.status(500).json({
 			message: "internal server error",
@@ -162,7 +162,7 @@ export const editProfile = async (req, res) => {
 			success: true,
 		});
 	} catch (err) {
-		console.log(err);
+		// console.log(err);
 		res.status(500).json({
 			message: "internal server error",
 			success: false,
@@ -175,6 +175,8 @@ export const getSuggestedUsers = async (req, res) => {
 		const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select(
 			"-password"
 		);
+		console.log(suggestedUsers);
+		
 		if (!suggestedUsers) {
 			res.status(400).json({
 				message: "currently dont have any suggested users",
@@ -182,7 +184,7 @@ export const getSuggestedUsers = async (req, res) => {
 		}
 		return res.status(200).json({
 			message: " here are your suggested users",
-			success: false,
+			success: true,
 			users: suggestedUsers,
 		});
 	} catch (err) {

@@ -23,9 +23,9 @@ userRouter.route("/login").post(login);
 userRouter.route("/logout").get(logout);
 userRouter.route("/:id/profile").get(isAuthenticated, getProfile);
 userRouter
-	.route("/profile/edit")
+	.route("/edit-profile")
 	.post(isAuthenticated, upload.single("profilePicture"), editProfile);
-userRouter.route("/suggested-user").get(isAuthenticated, getSuggestedUsers);
+userRouter.route("/suggested-users").get(isAuthenticated, getSuggestedUsers);
 userRouter
 	.route("/follow-or-unfollow/:id")
 	.post(isAuthenticated, followOrUnfollow);
