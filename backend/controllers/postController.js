@@ -217,3 +217,61 @@ export const addComment = async (req, res) => {
 		});
 	}
 };
+
+export const getCommentsOfPost = async (req, res) => {
+	try {
+		const postId = req.params.id;
+		if (!postId) {
+			return res.status(400).json({
+				message: "Invalid post ID",
+				success: false,
+			});
+		}
+		const comments = await Comment.find({ post: postId })
+			.sort({ createdAt: -1 })
+			.populate("author", "username profilePicture");
+
+		return res.status(200).json({
+			message: comments.length
+				? "Comments fetched successfully"
+				: "No comments found",
+			success: true,
+			comments,
+		});
+	} catch (err) {
+		// console.log(err);
+		return res.status(500).json({
+			message: " internal server Error",
+			success: false,
+		});
+	}
+};
+
+export const deletePost = async (req, res) => {
+	try {
+		const { id: authorId } = req;
+		const { id: postId } = req.params;
+
+		if (!postId)
+			return res
+				.status(404)
+				.json({ message: "send a valid post Id", success: false });
+
+		const post = await Post.findById(postId);
+		if (!post || post.author.toString() !== authorId)
+			return res.status(403).json({ message: "Unauthorized", success: false });
+
+		await Post.findByIdAndDelete(postId);
+		await User.findByIdAndUpdate(authorId, { $pull: { posts: postId } });
+
+		return res
+			.status(200)
+			.json({ message: "Post deleted successfully", success: true });
+	} catch (err) {
+		console.error(err);
+		return res
+			.status(500)
+			.json({ message: "Internal server error", success: false });
+	}
+};
+
