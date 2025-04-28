@@ -1,27 +1,28 @@
 import express from "express";
-import { isAuthenticated } from "../middlewares/isAuth";
-import upload from "../middlewares/multer";
+const postRouter = express.Router();
+import { isAuthenticated } from "../middlewares/isAuth.js";
+import upload from "../middlewares/multer.js";
 import {
-    addComment,
+	addComment,
 	addNewPost,
 	bookmarkPost,
 	deletePost,
 	disLikePost,
 	getAllPost,
 	getCommentsOfPost,
+	getUserPosts,
 	likePost,
-} from "../controllers/postController";
-const postRouter = express.Router();
+} from "../controllers/postController.js";
+
 postRouter
-	.route("/add-post")
+	.route("/create")
 	.post(isAuthenticated, upload.single("image"), addNewPost);
-postRouter.route("/all").get(isAuthenticated, getAllPost);
-postRouter.route("/user-post/all").post(isAuthenticated, getAllPost);
+postRouter.route("/all-posts").get(isAuthenticated, getAllPost);
+postRouter.route("/user-posts").get(isAuthenticated, getUserPosts);
 postRouter.route("/:id/like").post(isAuthenticated, likePost);
 postRouter.route("/:id/dislike").post(isAuthenticated, disLikePost);
 postRouter.route("/:id/comment").post(isAuthenticated, addComment);
-postRouter.route("/:id/comment/all").post(isAuthenticated, getCommentsOfPost);
-postRouter.route("/delete/:id").post(isAuthenticated, deletePost);
-
-postRouter.route("/comment/bookmark").post(isAuthenticated, bookmarkPost);
+postRouter.route("/:id/comments").post(isAuthenticated, getCommentsOfPost);
+postRouter.route("/:id/delete").post(isAuthenticated, deletePost);
+postRouter.route("/:id/bookmark").post(isAuthenticated, bookmarkPost);
 export default postRouter;

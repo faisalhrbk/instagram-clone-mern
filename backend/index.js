@@ -9,6 +9,8 @@ import dotenv from "dotenv";
 //Local Modules
 import connectDB from "./utils/mongoDb.js";
 import userRouter from "./routes/userRouter.js";
+import postRouter from "./routes/postRouter.js";
+import messageRouter from "./routes/messageRouter.js";
 
 // Packages Config and variables
 const app = express();
@@ -26,11 +28,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 //Routes
-app.get("/", (req, res, next) => {
-	res.send("hello world");
-});
-
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/post", postRouter);
+app.use("/api/v1/message", messageRouter);
 
 //Start Server
 app.listen(PORT, async () => {
