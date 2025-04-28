@@ -32,6 +32,15 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/post", postRouter);
 app.use("/api/v1/message", messageRouter);
 
+// Error Handling
+app.use((req, res) => {
+	res.status(404).json({ message: "Route not found", success: false });
+});
+app.use((err, req, res, next) => {
+	logger.error("Server error:", err);
+	res.status(500).json({ message: "Internal server error", success: false });
+});
+
 //Start Server
 app.listen(PORT, async () => {
 	await connectDB();
