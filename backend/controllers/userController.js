@@ -3,13 +3,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/dataUri.js";
 import cloudinary from "../utils/cloudinary.js";
+import Post from "../models/Post.js"
 
 export const register = async (req, res) => {
 	try {
 		const { username, email, password } = req.body;
 		if (!username || !email || !password) {
 			return res.status(401).json({
-				message: "Something is missing please Check email | password | username",
+				message:
+					"Something is missing please Check email | password | username",
 				success: false,
 			});
 		}
@@ -68,6 +70,10 @@ export const login = async (req, res) => {
 		const token = await jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
 			expiresIn: "1d",
 		});
+		const populatedPost = await Post.find({ _id: { $in: user.posts } })
+			.populate("author", "username profilePicture")
+			.sort({ createdAt: -1 })
+			.limit(20);
 		user = {
 			_id: user._id,
 			username: user.username,
@@ -119,7 +125,7 @@ export const logout = async (_, res) => {
 export const getProfile = async (req, res) => {
 	try {
 		const userId = req.params.id;
-		const user = await User.findById(userId).select('-password');
+		const user = await User.findById(userId).select("-password");
 		res.status(200).json({
 			user,
 			success: true,
@@ -176,7 +182,7 @@ export const getSuggestedUsers = async (req, res) => {
 			"-password"
 		);
 		console.log(suggestedUsers);
-		
+
 		if (!suggestedUsers) {
 			res.status(400).json({
 				message: "currently dont have any suggested users",
