@@ -246,8 +246,6 @@ export const getCommentsOfPost = async (req, res) => {
 		});
 	}
 };
-
-// export const deletePost = async (req, res) => {
 // 	try {
 // 		const { id: authorId } = req;
 // 		const { id: postId } = req.params;
@@ -275,14 +273,11 @@ export const getCommentsOfPost = async (req, res) => {
 // 	}
 // };
 
-
 export const deletePost = async (req, res) => {
 	try {
 		const { id: authorId } = req;
 		const { id: postId } = req.params;
-
-		// Validate postId
-		if (!postId.match(/^[0-9a-fA-F]{24}$/)) {
+		if (!postId) {
 			return res
 				.status(400)
 				.json({ message: "Invalid post ID", success: false });
@@ -317,7 +312,69 @@ export const deletePost = async (req, res) => {
 			success: true,
 		});
 	} catch (err) {
-		console.error("Error deleting post:", err);
+		// console.error("Error deleting post:", err);
+		return res.status(500).json({
+			message: "Internal server error",
+			success: false,
+		});
+	}
+};
+
+export const bookmarkPost = async (req, res) => {
+	try {
+		const { id: postId } = req.params;
+		const authorId = req.id;
+
+		// Validate postId
+		if (!postId) {
+			return res
+				.status(400)
+				.json({ message: "Invalid post ID", success: false });
+		}
+
+		// Check post and user
+		const [post, user] = await Promise.all([
+			Post.findById(postId),
+			User.findById(authorId),
+		]);
+
+		if (!post) {
+			return res
+				.status(404)
+				.json({ message: "Post not found", success: false });
+		}
+		if (!user) {
+			return res
+				.status(404)
+				.json({ message: "User not found", success: false });
+		}
+
+		const isBookmarked = user.bookmarks.includes(post._id.toString());
+		let message, type;
+
+		if (isBookmarked) {
+			await User.updateOne(
+				{ _id: authorId },
+				{ $pull: { bookmarks: post._id } }
+			);
+			message = "Post removed from bookmarks";
+			type = "unsaved";
+		} else {
+			await User.updateOne(
+				{ _id: authorId },
+				{ $addToSet: { bookmarks: post._id } }
+			);
+			message = "Post added to bookmarks";
+			type = "saved";
+		}
+
+		return res.status(200).json({
+			message,
+			type,
+			success: true,
+		});
+	} catch (err) {
+		console.error("Error bookmarking post:", err);
 		return res.status(500).json({
 			message: "Internal server error",
 			success: false,
