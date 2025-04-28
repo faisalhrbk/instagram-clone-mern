@@ -170,37 +170,49 @@ export const addComment = async (req, res) => {
 	try {
 		const commentKrneWalaKiId = req.id;
 		const postId = req.params.id;
-		const post = await Post.findById(postId);
 		const { text } = req.body;
+
 		if (!text) {
 			return res.status(400).json({
-				message: "comment is empty",
-				success: false,
-			});
-		}
-		if (!post) {
-			return res.status(401).json({
-				message: "post not found",
+				message: "Comment is empty",
 				success: false,
 			});
 		}
 
-		const comment = Comment.create({
+		const post = await Post.findById(postId);
+		if (!post) {
+			return res.status(404).json({
+				message: "Post not found",
+				success: false,
+			});
+		}
+
+		const comment = await Comment.create({
 			text,
 			author: commentKrneWalaKiId,
 			post: postId,
-		}).populate({ path: "author", select: "username profilePicture" });
-		post.comments.push(comment._id);
+		});
 
-		await post.save();
+		// Populate author details
+		const populatedComment = await Comment.findById(comment._id).populate({
+			path: "author",
+			select: "username profilePicture",
+		});
+
+		// Atomically add comment to post
+		await Post.findByIdAndUpdate(postId, {
+			$push: { comments: comment._id },
+		});
+
 		return res.status(201).json({
-			message: "comment added",
+			message: "Comment added",
 			success: true,
+			comment: populatedComment,
 		});
 	} catch (err) {
-		// console.log(err);
+		console.error("Error adding comment:", err);
 		return res.status(500).json({
-			message: " Internal Server Error!",
+			message: "Internal Server Error",
 			success: false,
 		});
 	}
